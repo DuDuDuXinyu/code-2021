@@ -43,12 +43,6 @@ public:
 		head = nullptr;
 	}
 
-
-	void InOrder()
-	{
-		InOrder(GetRoot());
-	}
-
 	bool Insert(const T& data)
 	{
 		//按照二叉搜索树的规则插入新节点
@@ -157,7 +151,64 @@ public:
 		return true;
 	}
 
+	void InOrder()
+	{
+		InOrder(GetRoot());
+	}
+
+	bool IsValidRBTree()
+	{
+		Node* root = GetRoot();
+		if (nullptr == root)
+			return true;
+
+		if (BLACK != root->color)
+		{
+			cout << "违反了性质二：根节点的颜色不是黑色的" << endl;
+			return false;
+		}
+
+		size_t blackCount = 0;
+		Node* cur = root;
+		while (cur)
+		{
+			if (BLACK == cur->color)
+				blackCount++;
+			cur = cur->left;
+		}
+		size_t pathBlackCount = 0;
+		return _IsValidRBTree(root, pathBlackCount, blackCount);
+	}
+
 private:
+	bool _IsValidRBTree(Node* root, size_t pathBlackCount, const size_t blackCount)
+	{
+		if (nullptr == root)
+			return true;
+
+		if (BLACK == root->color)
+			pathBlackCount++;
+
+		Node* parent = root->parent;
+		//head != parent说明root不是根节点，parent为有效节点
+		if (head != parent && RED == parent->color && RED == root->color)
+		{
+			cout << "违反了性质三：存在连在一起的红色节点" << endl;
+			return false;
+		}
+
+		if (nullptr == root->left && nullptr == root->right)
+		{
+			if (pathBlackCount != blackCount)
+			{
+				cout << "违反了性质四：路径中黑色节点的个数不一样" << endl;
+				return false;
+			}
+		}
+		return _IsValidRBTree(root->left, pathBlackCount, blackCount)&&
+			_IsValidRBTree(root->right, pathBlackCount, blackCount);
+	}
+
 	void RotateLeft(Node* parent)
 	{
 		Node* subR = parent->right;
@@ -279,4 +330,14 @@ void TestRBTree()
 	// 验证红黑树正确性：
 	// 1. 是否为二叉树搜索树-->检测中序遍历是否为有序序列
 	t.InOrder();
+
+	// 2. 验证红黑树性质--
+	if (t.IsValidRBTree())
+	{
+		cout << "t is a RBTree!!!" << endl;
+	}
+	else
+	{
+		cout << "t is not a RBTree!!!" << endl;
+	}
 }
