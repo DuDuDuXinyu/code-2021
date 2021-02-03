@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+using namespace std;
 
 enum Color{RED, BLACK};
 
@@ -6,7 +8,7 @@ enum Color{RED, BLACK};
 template <class T>
 struct RBTreeNode
 {
-	RBTreeNode(const T& x, Color c = RED)
+	RBTreeNode(const T& x = T(), Color c = RED)
 		:left(nullptr)
 		, right(nullptr)
 		, parent(nullptr)
@@ -32,6 +34,19 @@ public:
 		head->left = head;
 		head->right = head;
 		head->parent = nullptr;
+	}
+
+	~RBTree()
+	{
+		Destroy(GetRoot());
+		delete head;
+		head = nullptr;
+	}
+
+
+	void InOrder()
+	{
+		InOrder(GetRoot());
 	}
 
 	bool Insert(const T& data)
@@ -73,9 +88,65 @@ public:
 		cur->parent = parent;
 
 		//检测新插入节点与其双亲节点的颜色是否都为红色
-		if (RED == parent->color)
+		while (parent != head && RED == parent->color)
 		{
-
+			Node* grandFather = parent->parent;
+			if (parent == grandFather->left)
+			{
+				Node* uncle = grandFather->right;
+				if (uncle && RED == uncle->color)
+				{
+					//情况一：叔叔节点存在且为红
+					parent->color = BLACK;
+					uncle->color = BLACK;
+					grandFather->color = RED;
+					cur = grandFather;
+					parent = cur->parent;
+				}
+				else
+				{
+					//叔叔节点不存在-->情况二
+					//或者叔叔节点存在且为黑色-->情况三
+					if (cur == parent->right)
+					{
+						//情况三：
+						RotateLeft(parent);
+						swap(parent, cur);
+					}
+					//情况二：
+					grandFather->color = RED;
+					parent->color = BLACK;
+					RotateRight(grandFather);
+				}
+			}
+			else
+			{
+				Node* uncle = grandFather->left;
+				if (uncle && RED == uncle->color)
+				{
+					//情况一：叔叔节点存在且为红
+					parent->color = BLACK;
+					uncle->color = BLACK;
+					grandFather->color = RED;
+					cur = grandFather;
+					parent = cur->parent;
+				}
+				else
+				{
+					//叔叔节点不存在-->情况二
+					//或者叔叔节点存在且为黑色-->情况三
+					if (cur == parent->left)
+					{
+						//情况三：
+						RotateRight(parent);
+						swap(parent, cur);
+					}
+					//情况二：
+					grandFather->color = RED;
+					parent->color = BLACK;
+					RotateLeft(grandFather);
+				}
+			}
 		}
 
 		//新节点插入后，红色树中的最大或者最小节点发送变化
@@ -87,7 +158,62 @@ public:
 	}
 
 private:
-	Node* GetRoot()
+	void RotateLeft(Node* parent)
+	{
+		Node* subR = parent->right;
+		Node* subRL = subR->left;
+		
+		parent->right = subRL;
+		if (subRL)
+			subRL->parent = parent;
+
+		subR->left = parent;
+
+		Node* pparent = parent->parent;
+		parent->parent = subR;
+		subR->parent = pparent;
+		//需要处理旋转之前parent双亲的情况
+		if (head == pparent)
+		{
+			//旋转之前parent是根节点
+			head->parent = subR;
+		}
+		else
+		{
+			//旋转之前有双亲
+			if (parent == pparent->left)
+				pparent->left = subR;
+			else
+				pparent->right = subR;
+		}
+	}
+
+	void RotateRight(Node* parent)
+	{
+		Node* subL = parent->left;
+		Node* subLR = subL->right;
+
+		parent->left = subLR;
+		if (subLR)
+			subLR->parent = parent;
+		subL->right = parent;
+
+		Node* pparent = parent->parent;
+		parent->parent = subL;
+		subL->parent = pparent;
+
+		if (head == pparent)
+			head->parent = subL;
+		else
+		{
+			if (parent == pparent->left)
+				pparent->left = subL;
+			else
+				pparent->right = subL;
+		}
+	}
+
+	Node*& GetRoot()
 	{
 		return head->parent;
 	}
@@ -117,6 +243,40 @@ private:
 
 		return cur;
 	}
+
+	void InOrder(Node* root)
+	{
+		if (root)
+		{
+			InOrder(root->left);
+			cout << root->data << " ";
+			InOrder(root->right);
+		}
+	}
+
+	void Destroy(Node*& root)
+	{
+		if (root)
+		{
+			Destroy(root->left);
+			Destroy(root->right);
+			delete root;
+			root = nullptr;
+		}
+	}
+
 private:
 	Node* head;	//指向红黑树中的头结点
 };
+
+void TestRBTree()
+{
+	int array[] = { 5, 3, 4, 1, 7, 8, 2, 6, 0, 9 };
+	RBTree<int> t;
+	for (auto e : array)
+		t.Insert(e);
+
+	// 验证红黑树正确性：
+	// 1. 是否为二叉树搜索树-->检测中序遍历是否为有序序列
+	t.InOrder();
+}
