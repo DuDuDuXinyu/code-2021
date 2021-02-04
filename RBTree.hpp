@@ -23,12 +23,126 @@ struct RBTreeNode
 	Color color;
 };
 
-template <class T>
+template<class T>
+struct RBTreeIterator
+{
+	typedef RBTreeNode<T> Node;
+	typedef RBTreeIterator<T> Self;
+public:
+	RBTreeIterator(Node* n = nullptr)
+		:node(n)
+	{}
+
+	T& operator*()
+	{
+		return node->data;
+	}
+
+	T* operator->()
+	{
+		return &(operator*());
+	}
+
+	Self& operator++()	//前置++
+	{
+		Increment();
+		return *this;
+	}
+
+	Self operator++(int)	//后置++
+	{
+		Self temp(*this);
+		Increment();
+		return temp;
+	}
+
+	Self& operator--()	//前置--
+	{
+		Decrement();
+		return *this;
+	}
+
+	Self operator--(int)	//后置--
+	{
+		Self temp(*this);
+		Decrement();
+		return temp;
+	}
+
+	//找到当前迭代器的下一个位置
+	void Increment()
+	{
+		if (node->right)
+		{
+			//node右子树存在，在右子树中找
+			node = node->right;
+			while (node->left)
+				node = node->left;
+		}
+		else
+		{
+			//不存在，找node的双亲
+			Node* parent = node->parent;
+			while (node == parent->right)
+			{
+				node = parent;
+				parent = node->parent;
+			}
+			
+			//当node是parent的左孩子的时候，循环结束
+			if (node->right != parent)
+				node = parent;
+		}
+	}
+
+	//找到当前迭代器的上一个位置
+	void Decrement()
+	{
+		if (node->parent->parent == node && node->color == RED)
+		{
+			//node在end的位置
+			node = node->right;
+		}
+		else if (node->left)
+		{
+			node = node->left;
+			while (node->right)
+				node = node->right;
+		}
+		else
+		{
+			Node* parent = node->parent;
+			while (node == parent->left)
+			{
+				node = parent;
+				parent = node->parent;
+			}
+			node = parent;
+		}
+	}
+
+	bool operator !=(const Self& s)const
+	{
+		return node != s.node;
+	}
+	bool operator ==(const Self& s)const
+	{
+		return node == s.node;
+	}
+
+private:
+	Node* node;
+};
+
+template <class T, class KOFD>
 class RBTree
 {
 	typedef RBTreeNode<T> Node;
 public:
+	typedef RBTreeIterator<T> iterator;
+public:
 	RBTree()
+		:_size(0)
 	{
 		head = new Node();
 		head->left = head;
@@ -41,9 +155,30 @@ public:
 		Destroy(GetRoot());
 		delete head;
 		head = nullptr;
+		_size = 0;
 	}
 
-	bool Insert(const T& data)
+	iterator begin()
+	{
+		return iterator(head->left);
+	}
+
+	iterator end()
+	{
+		return iterator(head);
+	}
+
+	size_t size()const
+	{
+		return _size;
+	}
+
+	bool empty()const
+	{
+		return nullptr == head->parent;
+	}
+
+	pair<iterator,bool> Insert(const T& data)
 	{
 		//按照二叉搜索树的规则插入新节点
 		Node*& root = GetRoot();
@@ -55,26 +190,30 @@ public:
 			root->parent = head;
 			head->left = root;
 			head->right = root;
-			return true;
+			_size = 1;
+			return make_pair(iterator(root), true);
 		}
 
 		//找到待插入节点在红黑树中的位置
 		Node* cur = root;
 		Node* parent = head;
+		KOFD key;
 		while (cur)
 		{
 			parent = cur;
-			if (data < cur->data)
+			//注意使用data中的key来进行比较
+			if (key(data) < key(cur->data))
 				cur = cur->left;
-			else if (data > cur->data)
+			else if (key(data) > key(cur->data))
 				cur = cur->right;
 			else
-				return false;
+				return make_pair(iterator(cur), false);
 		}
 
 		//插入新节点
-		cur = new Node(data);
-		if (data < parent->data)
+		Node* newNode = new Node(data);
+		cur = newNode;
+		if (key(data) < key(parent->data))
 			parent->left = cur;
 		else
 			parent->right = cur;
@@ -147,8 +286,37 @@ public:
 		root->color = BLACK;
 		head->left = LeftMost();
 		head->right = RightMost();
+		_size++;
 
-		return true;
+		return make_pair(iterator(newNode), true);
+	}
+
+	void Swap(RBTree<T, KOFD>& t)
+	{
+		swap(head, t.head);
+		swap(_size, t._size);
+	}
+
+	void Clear()
+	{
+		Destroy(GetRoot());
+		_size = 0;
+	}
+
+	iterator Find(const T& data)
+	{
+		Node* cur = GetRoot();
+		KOFD key;
+		while (cur)
+		{
+			if (key(data) == key(cur->data))
+				return iterator(cur);
+			else if (key(data) < key(cur->data))
+				cur = cur->left;
+			else
+				cur = cur->right;
+		}
+		return end();
 	}
 
 	void InOrder()
@@ -318,12 +486,21 @@ private:
 
 private:
 	Node* head;	//指向红黑树中的头结点
+	size_t _size;
+};
+
+struct KOFD
+{
+	int operator()(int data)
+	{
+		return data;
+	}
 };
 
 void TestRBTree()
 {
 	int array[] = { 5, 3, 4, 1, 7, 8, 2, 6, 0, 9 };
-	RBTree<int> t;
+	RBTree<int, KOFD> t;
 	for (auto e : array)
 		t.Insert(e);
 
@@ -340,4 +517,16 @@ void TestRBTree()
 	{
 		cout << "t is not a RBTree!!!" << endl;
 	}
+
+	auto it = t.begin();
+	while (it != t.end())
+	{
+		cout << *it << " ";
+		it++;
+	}
+	cout << endl;
+
+	for (auto e : t)
+		cout << e << " ";
+	cout << endl;
 }
