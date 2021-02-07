@@ -42,3 +42,51 @@ public:
             return false;
     }
 };
+
+有序数组的平方：https://leetcode-cn.com/problems/squares-of-a-sorted-array/
+
+class Solution {
+public:
+    vector<int> sortedSquares(vector<int>& nums) {
+        for (auto&e : nums)
+            e *= e;
+        sort(nums.begin(), nums.end());
+        return nums;
+    }
+};
+
+仅仅反转字母：https://leetcode-cn.com/problems/reverse-only-letters/
+
+class Solution {
+public:
+    string reverseOnlyLetters(string S) {
+        int begin=0,end=S.size()-1;
+
+        while(begin<end)
+        {
+            while(begin<end)
+            {
+                if(isalpha(S[begin]))
+                    break;
+                begin++;
+            }
+
+            while(begin<end)
+            {
+                if(isalpha(S[end]))
+                    break;
+                end--;
+            }
+
+            if(begin>=end)
+                break;
+            else
+            {
+                swap(S[begin],S[end]);
+                begin++;
+                end--;
+            }
+        }
+        return S;
+    }
+};
