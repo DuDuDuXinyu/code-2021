@@ -90,3 +90,43 @@ public:
         return S;
     }
 };
+
+第三大的数：https://leetcode-cn.com/problems/third-maximum-number/
+
+class Solution {
+public:
+    int thirdMax(vector<int>& nums) {
+        set<int> s(nums.begin(), nums.end());
+        auto it = s.end();
+        it--;
+        int i = 2;
+        if (s.size() >= 3)
+            while(i--)
+                it--;
+        return *it;
+    }
+};
+
+加一：https://leetcode-cn.com/problems/plus-one/
+
+class Solution {
+public:
+    vector<int> plusOne(vector<int>& digits) {
+        int i = digits.size() - 1;
+        if (digits[i] == 9)
+        {
+            while(i >= 0 && digits[i] == 9)
+            {
+                digits[i] = 0;
+                i--;
+            }
+            if (i < 0)
+                digits.insert(digits.begin(),1);
+            else
+                digits[i]++;
+        }
+        else
+            digits[i]++;
+        return digits;
+    }
+};
