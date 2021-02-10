@@ -239,3 +239,60 @@ public:
         return -1;
     }
 };
+
+字符串转换整数：https://leetcode-cn.com/problems/string-to-integer-atoi/submissions/
+
+class Solution {
+public:
+    int myAtoi(string s) {
+        int i = 0;
+        int a = 1;
+        long num = 0;
+        while (s[i] == ' ')
+            i++;
+        
+        if (s[i] <= '9' && s[i] >= '0' || s[i] == '+' || s[i] == '-')
+        {
+            if (s[i] == '+')
+                i++;
+            else if (s[i] == '-')
+            {
+                a = -1;
+                i++;
+            }
+            while (s[i] <= '9' && s[i] >= '0')
+            {
+                num = num * 10 + (s[i] - '0');
+                i++;
+                if (a * num <= INT_MIN )
+                    return INT_MIN;
+                else if (a * num >= INT_MAX)
+                    return INT_MAX;
+            }
+        }
+        return  int(a * num);
+    }
+};
+
+在排序数中查找元素的第一个和最后一个位置：
+https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/submissions/
+
+class Solution {
+public:
+    vector<int> searchRange(vector<int>& nums, int target) {
+        vector<int> v{-1,-1};
+        int begin = 0;
+        for (; begin < nums.size(); begin++)
+        {
+            if (nums[begin] == target)
+            {
+                v[0] = begin;
+                while(begin < nums.size() && nums[begin] == target)
+                    begin++;
+                v[1] = begin - 1;
+                return v;
+            }
+        }
+        return v;
+    }
+};
