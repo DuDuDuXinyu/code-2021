@@ -296,3 +296,86 @@ public:
         return v;
     }
 };
+
+验证回文串：https://leetcode-cn.com/problems/valid-palindrome/
+
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        if(s.empty())
+            return true;
+
+        for(auto& ch:s)
+        {
+            if(ch>='A'&&ch<='Z')
+                ch+=32;
+        }
+        int begin=0,end=s.size()-1;
+        while(begin<end)
+        {
+            while(begin<end)
+            {
+                if(isalnum(s[begin]))
+                    break;
+                begin++;
+            }
+
+            while(begin<end)
+            {
+                if(isalnum(s[end]))
+                    break;
+                end--;
+            }
+            if(s[begin] !=s [end])
+                return false;
+            else
+            {
+                begin++;
+                end--;
+            }
+        }
+        return true;
+    }
+};
+
+压缩字符串：https://leetcode-cn.com/problems/string-compression/
+
+class Solution {
+public:
+    int compress(vector<char>& chars) {
+        int i = 0;
+        int k = 0;
+        while (i < chars.size())
+        {
+            int count = 1;
+            int key = i;
+            while (i + 1 < chars.size() && chars[i] == chars[i + 1])
+            {
+                count++;
+                i++;
+            }
+            i++;
+            if (count != 1)
+            {
+                //元素有很多的情况
+                chars[k++] = chars[key];
+                vector<char> v;
+                while (count)
+                {
+                    v.push_back(count % 10);
+                    count /= 10;
+                }
+                for (auto it = v.rbegin(); it < v.rend(); it++)
+                {
+                    chars[k++] = *it + '0';
+                }
+            }
+            else
+            {
+                //元素只有一个的情况
+                chars[k++] = chars[key];
+            }
+        }
+        return k;
+    }
+};
