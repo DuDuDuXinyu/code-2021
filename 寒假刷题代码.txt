@@ -379,3 +379,80 @@ public:
         return k;
     }
 };
+
+最短无序连续子数组：https://leetcode-cn.com/problems/shortest-unsorted-continuous-subarray/submissions/
+
+class Solution {
+public:
+    int findUnsortedSubarray(vector<int>& nums) {
+        if (nums[0] > nums[nums.size() - 1])
+            return nums.size();
+
+        int begin = -1; 
+        int end = -1;
+        vector<int> v;
+        for (auto e : nums)
+            v.push_back(e);
+        sort(v.begin(), v.end());
+
+        for (int i = 0; i < nums.size(); i++)
+        {
+            if (nums[i] != v[i])
+            {
+                begin = i;
+                break;
+            }
+        }
+        if (begin == -1)
+            return 0;
+        for (int i = nums.size() - 1; i >= 0; i--)
+        {
+            if (nums[i] != v[i])
+            {
+                end = i;
+                break;
+            }
+        }
+        return end - begin + 1;
+    }
+};
+
+逆波兰表达式求值：https://leetcode-cn.com/problems/evaluate-reverse-polish-notation/
+
+class Solution {
+public:
+    int evalRPN(vector<string>& tokens) {
+        stack<int> s;
+        for(auto e:tokens)
+        {
+            if(!("+"==e||"-"==e||"*"==e||"/"==e))
+            {
+                s.push(atoi(e.c_str()));
+            }
+            else
+            {
+                int right=s.top();
+                s.pop();
+                int left=s.top();
+                s.pop();
+
+                switch(e[0])
+                {
+                    case '+':
+                       s.push(left+right);
+                        break;
+                    case '-':
+                       s.push(left-right);
+                        break;
+                    case '*':
+                       s.push(left*right);
+                        break;
+                    case '/':
+                       s.push(left/right);
+                        break;
+                }
+            }
+        }
+        return s.top();
+    }
+};
