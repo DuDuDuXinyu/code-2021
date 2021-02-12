@@ -456,3 +456,29 @@ public:
         return s.top();
     }
 };
+
+子集：https://leetcode-cn.com/problems/subsets/submissions/
+
+class Solution {
+public:
+    vector<vector<int>> res;
+    vector<int> v;
+    void backtracking(vector<int>& nums, int index)
+    {
+        res.push_back(v);
+        if (index >= nums.size())
+            return;
+        
+        for (int i = index; i < nums.size(); i++)
+        {
+            v.push_back(nums[i]);
+            backtracking(nums, i + 1);
+            v.pop_back();
+        }
+    }
+
+    vector<vector<int>> subsets(vector<int>& nums) {
+        backtracking(nums, 0);
+        return res;
+    }
+};
