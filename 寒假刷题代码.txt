@@ -524,3 +524,84 @@ private:
     int columns;
     int dirs[4][2] = { {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
 };
+
+二叉树的右视图：https://leetcode-cn.com/problems/binary-tree-right-side-view/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void _rightSideView(TreeNode* root, int level)
+    {
+        if (root == nullptr)
+            return ;
+        
+        if (level > max_level)
+        {
+            v.push_back(root->val);
+            max_level = level;
+        }
+
+        _rightSideView(root->right, level + 1);
+        _rightSideView(root->left, level + 1);
+    }
+
+    vector<int> rightSideView(TreeNode* root) {
+         _rightSideView(root, 1);
+         return v;
+    }
+    int max_level = 0;
+    vector<int> v;
+};
+
+公交路线：https://leetcode-cn.com/problems/bus-routes/
+
+class Solution {
+public:
+    int numBusesToDestination(vector<vector<int>>& routes, int source, int target) {
+        if (source == target)
+		return 0;
+
+	//把每一站都有什么车给存入stop2bus
+	unordered_map<int, vector<int>> stop2bus;
+	for (int i = 0; i < routes.size(); i++)
+		for (auto e : routes[i])
+			stop2bus[e].push_back(i);
+
+	queue<int> q{ {source} };
+	int level = 0;
+	unordered_set<int> visited;
+
+	while (!q.empty())
+	{
+		for (int i = q.size(); i > 0; i--)
+		{
+			int curStop = q.front();
+			q.pop();
+			if (curStop == target)
+				return level;
+
+			for (const auto& bus : stop2bus[curStop])
+			{
+				if (visited.count(bus))
+					continue;
+
+				visited.insert(bus);
+				for (const auto& stop : routes[bus])
+					q.push(stop);
+			}
+		}
+		level++;
+	}
+	return -1;
+    }
+};
