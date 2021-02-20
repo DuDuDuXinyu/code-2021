@@ -802,3 +802,166 @@ public:
     }
 };
 
+划分链表：https://www.nowcoder.com/questionTerminal/1dc1036be38f45f19000e48abe00b12f
+
+/**
+ * struct ListNode {
+ *	int val;
+ *	struct ListNode *next;
+ * };
+ */
+
+class Solution {
+public:
+    /**
+     * 
+     * @param head ListNode类 
+     * @param x int整型 
+     * @return ListNode类
+     */
+    ListNode* partition(ListNode* head, int x) {
+        // write code here
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        ListNode* cur = head->next;    //遍历的节点
+        ListNode* prev = head;    //遍历节点的前一个节点
+        ListNode* insertNode = head;    //插入节点的位置
+        
+        while(cur)
+        {
+            //先不管第一个的节点的位置是否正确
+            while (cur && cur->val >= x)
+            {
+                prev = cur;
+                cur = cur->next;
+            }
+            if (cur && insertNode == prev)
+            {
+                prev = cur;
+                insertNode = cur;
+                cur = cur->next;
+            }
+            else if (cur)
+            {
+                prev->next = cur->next;
+                cur->next = insertNode->next;
+                insertNode->next = cur;
+                insertNode = cur;
+                cur = prev->next;
+            }
+        }
+        if (head->val >= x && head->next && head->next->val < x )
+        {
+            ListNode* res = head->next;
+            head->next = insertNode->next;
+            insertNode->next = head;
+            return res;
+        }
+        return head;
+    }
+};
+
+序列化二叉树：https://www.nowcoder.com/questionTerminal/cf7e25aa97c04cc1a68c8f040e71fb84
+
+/*
+struct TreeNode {
+    int val;
+    struct TreeNode *left;
+    struct TreeNode *right;
+    TreeNode(int x) :
+            val(x), left(NULL), right(NULL) {
+    }
+};
+*/
+class Solution {
+public:
+    void _Serialize(TreeNode *root, string& s)
+    {
+        if (root)
+        {
+            s +=  to_string(root->val);
+            s += ',';
+            _Serialize(root->left, s);
+            _Serialize(root->right, s);
+        }
+        else
+            s += "#,";
+    }
+    char* Serialize(TreeNode *root) {
+        string s = "";
+        
+        //先序遍历
+        _Serialize(root, s);
+        char *ret = new char[s.length() + 1];
+        strcpy(ret, s.c_str());
+        return ret;
+    }
+    
+    TreeNode* _Deserialize(string& s)
+    {
+        if (s.empty())
+            return nullptr;
+        if (s[0] == '#')
+        {
+            s = s.substr(2);
+            return nullptr;
+        }
+        
+        TreeNode* ret = new  TreeNode(stoi(s));
+        s = s.substr(s.find_first_of(',') + 1);
+        ret->left = _Deserialize(s);
+        ret->right = _Deserialize(s);
+        return ret;
+    }
+    TreeNode* Deserialize(char *str) {
+        if (str == nullptr)
+            return nullptr;
+        string s(str);
+        return _Deserialize(s);
+    }
+};
+
+删除有序链表中重复出现的元素：https://www.nowcoder.com/questionTerminal/71cef9f8b5564579bf7ed93fbe0b2024
+
+/**
+ * struct ListNode {
+ *	int val;
+ *	struct ListNode *next;
+ * };
+ */
+
+class Solution {
+public:
+    /**
+     * 
+     * @param head ListNode类 
+     * @return ListNode类
+     */
+    ListNode* deleteDuplicates(ListNode* head) {
+        // write code here
+        if (head == nullptr || head->next == nullptr)
+            return head;
+        ListNode* res = new ListNode(0);
+        ListNode* prev = res;
+        ListNode* cur = head;
+        while (cur)
+        {
+            int flag = 1;
+            while (cur->next && cur->val == cur->next->val)
+            {
+                cur = cur->next;
+                flag = 0;
+            }
+            
+            if (flag)
+            {
+                prev->next = cur;
+                prev = prev->next;
+            }
+            
+            cur = cur->next;
+            prev->next = nullptr;
+        }
+        return res->next;
+    }
+};
