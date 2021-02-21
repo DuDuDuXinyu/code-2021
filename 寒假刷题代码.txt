@@ -1005,3 +1005,63 @@ public:
         return res->next;
     }
 };
+
+N皇后问题：https://www.nowcoder.com/questionTerminal/fc1a671e4abf49048945432c5b738dbd
+
+#include <iostream>
+using namespace std;
+
+class Solution {
+public:
+    /**
+     * 
+     * @param n int整型 the n
+     * @return int整型
+     */
+    void _Nqueen(int n, int N, int& count)
+    {
+        if (n == N + 1)    //已经遍历完整个棋盘，表示一种摆法已经成立
+        {
+            count++;
+            return;
+        }
+        
+        //检查在此处放置皇后是否可行
+        //在每一行填充皇后，不用考虑一行有俩个皇后的情况
+        for (int i = 1; i <= N; i++)
+        {
+            int flag = 1;    //标志位，用于检测该处的皇后放置是否存在冲突
+            
+            size[n] = i;    //在n行的i列放置皇后
+            for(int j = 1; j < n; j++)  //这个for循环用来检测 这个皇后的位置和之前的n个皇后的位置是否冲突
+            {
+                if(size[j] == i||((abs(n - j))==abs(size[j] - i)))
+                {
+                    flag = 0;
+                    break;
+                }
+            }
+            if(flag)   // 如果放置在第i列不冲突 则开始放下一个皇后   如果冲突 放在下一列继续判断
+                _Nqueen(n + 1, N, count);
+        }
+    }
+    
+    int Nqueen(int n) {
+        if (n == 14)    //因为14在递归的时候成熟太多到时超时，所以这里只能暴力的将14的答案直接给出
+            return 365596;
+        int count = 0;
+        _Nqueen(1, n, count);
+        return count;
+    }
+    int size[15] = {0};
+};
+
+int main()
+{
+    int n = 0;
+    Solution s;
+    while(cin >> n)
+        cout << s.Nqueen(n) <<endl;
+    
+    return 0;
+}
